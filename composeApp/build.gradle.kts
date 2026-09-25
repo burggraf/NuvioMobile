@@ -3,8 +3,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -16,8 +15,7 @@ abstract class GenerateRuntimeConfigsTask : DefaultTask() {
     @get:OutputDirectory
     abstract val outputDir: DirectoryProperty
 
-    @get:Optional
-    @get:InputFile
+    @get:InputFiles
     abstract val localPropertiesFile: RegularFileProperty
 
     @get:Input
@@ -44,8 +42,15 @@ abstract class GenerateRuntimeConfigsTask : DefaultTask() {
     @get:Input
     abstract val tmdbApiKey: Property<String>
 
+    @get:Input
+    abstract val requireSupabaseConfig: Property<Boolean>
+
     @TaskAction
     fun generate() {
+        if (requireSupabaseConfig.get()) {
+            check(supabaseUrl.get().isNotBlank()) { "NUVIO_SUPABASE_URL is required for TestFlight builds." }
+            check(supabaseAnonKey.get().isNotBlank()) { "NUVIO_SUPABASE_ANON_KEY is required for TestFlight builds." }
+        }
         val props = Properties()
         localPropertiesFile.asFile.orNull?.takeIf { it.exists() }?.inputStream()?.use { props.load(it) }
 
@@ -323,6 +328,7 @@ val generateRuntimeConfigs = tasks.register<GenerateRuntimeConfigsTask>("generat
     supabaseFallbackUrl.set(runtimeConfigValue("NUVIO_SUPABASE_FALLBACK_URL"))
     sentryDsn.set(runtimeConfigValue("SENTRY_DSN"))
     tmdbApiKey.set(runtimeConfigValue("TMDB_API_KEY"))
+    requireSupabaseConfig.set(runtimeConfigBoolean("NUVIO_REQUIRE_BACKEND_CONFIG", false))
     sentryEnvironment.set(
         when {
             requestedGradleTasks.any { "benchmark" in it } -> "benchmark"
@@ -399,6 +405,7 @@ kotlin {
                 if (iosDistribution == "full") {
                     implementation(libs.quickjs.kt)
                     implementation(libs.ksoup)
+                    implementation("dev.whyoleg.cryptography:cryptography-provider-cryptokit:0.5.0")
                 }
             }
         }

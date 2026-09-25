@@ -50,6 +50,19 @@ env NUVIO_IOS_DISTRIBUTION=full xcodebuild \
 
 The shared app is built with Kotlin Multiplatform and Compose Multiplatform.
 
+### TestFlight
+
+On a Mac signed into Xcode with access to the Apple Developer team, provide App Store Connect credentials and run. Set `NUVIO_SUPABASE_URL` and `NUVIO_SUPABASE_ANON_KEY` in the environment or `local.properties`; the release build rejects missing auth configuration.
+
+```bash
+APPLE_TEAM_ID=YOUR_TEAM_ID \
+APPLE_ID=you@example.com \
+APPLE_APP_SPECIFIC_PASSWORD=xxxx-xxxx-xxxx-xxxx \
+  ./scripts/release/testflight.sh
+```
+
+The script builds and uploads a signed Release IPA for `com.nuvio.app.NuvioHEGN9W2S9J`. Use `--no-upload` to build/export without uploading, or `--build-number NUMBER` to choose the numeric build number. The App Store Connect record is **Nuvio Media Player** (SKU `nuvio-ios`).
+
 ## License
 
 [GNU General Public License v3.0](./LICENSE)
