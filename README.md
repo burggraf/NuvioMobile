@@ -63,6 +63,14 @@ APPLE_APP_SPECIFIC_PASSWORD=xxxx-xxxx-xxxx-xxxx \
 
 The script builds and uploads a signed Release IPA for `com.nuvio.app.NuvioHEGN9W2S9J`. Use `--no-upload` to build/export without uploading, or `--build-number NUMBER` to choose the numeric build number. The App Store Connect record is **Nuvio Media Player** (SKU `nuvio-ios`).
 
+To sync the upstream and fork branches, then build and upload in one step, run:
+
+```bash
+./scripts/release/sync-upstream-testflight.sh
+```
+
+It expects a clean `cmp-rewrite` checkout tracking `personal/cmp-rewrite`, with `origin` pointing to `NuvioMedia/NuvioMobile` and `personal` to your fork. It fetches both, merges them into the local branch, pushes the result to your fork, then runs the TestFlight release script. Merge conflicts stop the script; resolve and commit them before rerunning. Release options such as `--no-upload` and `--build-number NUMBER` are forwarded.
+
 ## License
 
 [GNU General Public License v3.0](./LICENSE)
